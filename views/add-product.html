@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
     <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/forms.css">
 
 </head>
 
@@ -13,7 +13,7 @@
     <header class="main-header">
         <nav class="main-header__nav">
             <ul class="main-header__item-list">
-                <li class="main-header__item"><a class="active"  href="admin/add-product">Add Product</a></li>
+                <li class="main-header__item"><a class="active"  href="/admin/add-product">Add Product</a></li>
                 <li class="main-header__item" ><a href="/" >Shop</a></li>
             </ul>
         </nav>
@@ -21,7 +21,7 @@
 
     <main>
         <h1> Add Product Page</h1>
-        <form class="product-form" action="/add-product" method="POST">
+        <form class="product-form" action="/admin/add-product" method="POST">
             <div class="form-control">
                 <label>Title</label>
                 <input type="text" name="title" id="title">
