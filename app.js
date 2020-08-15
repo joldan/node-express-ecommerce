@@ -6,6 +6,9 @@ const rootDir = require('./util/path');
 
 const app = express();
 
+app.set('view engine', 'ejs');
+app.set('views', 'views')
+
 const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
@@ -17,7 +20,7 @@ app.use(shopRoutes);
 
 app.use( (req, res, next) =>{
     // res.status(404).send('<h1>Oooops, we found a place where nothing exists</h1>')
-    res.status(404).sendFile(path.join(rootDir, 'views', '404.html'));
+    res.status(404).render('404',{pageTitle : "Page not found"});
     }); 
 
 
