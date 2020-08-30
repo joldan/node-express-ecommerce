@@ -6,13 +6,16 @@ const express = require('express');
 const router = express.Router();
 
 //Controller imports
-const productController = require('../controllers/products')
+const adminController = require('../controllers/admin')
 
 //file logic management
 
-router.get('/add-product', productController.getAddProduct);
+//admin/add-products
+router.get('/add-product', adminController.getAddProduct);
 
-router.post('/add-product', productController.postAddProduct);
+router.get('/products', adminController.getProducts);
+
+router.post('/add-product', adminController.postAddProduct);
 
 //exports
 module.exports = router;

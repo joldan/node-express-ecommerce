@@ -1,16 +1,16 @@
 const fs = require('fs')
 const path = require('path')
 
-const p = path.join(
+//path of product dara file
+const productPath = path.join(
     path.dirname(process.mainModule.filename),
     'data',
     'products.json' 
     );
 
+//reads file and passes it to a callback function after file is read
 const getProductFromFile = (callback) => {
-    console.log('in get Product From file');
-    console.log(callback);
-    fs.readFile(p, (err, fileContent) => {  
+    fs.readFile(productPath, (err, fileContent) => {  
         if(err){
             return callback([]);
         }
@@ -18,24 +18,35 @@ const getProductFromFile = (callback) => {
     })
 }
 
+//product model class
 module.exports = class Product {
-    constructor(title){
+    constructor(title, imageUrl, description, price){
         this.title = title;
+        this.imageUrl = imageUrl,
+        this.description = description,
+        this.price = price
     }
 
     save (){
-        console.log('in save')
+        this.id = Math.random().toString();
         getProductFromFile( products => {
             products.push(this)
-            fs.writeFile(p,JSON.stringify(products), (err) => {
+            fs.writeFile(productPath,JSON.stringify(products), (err) => {
                 console.log(err);
             });
         });
     }
     
+    static findById(id, cb) {
+        getProductFromFile(products => {
+            //console.log(products);
+            const product = products.find( prod => {
+                return prod.id === id});
+            cb(product)
+        })
+    }
+
     static fetchAll(callback){
-        console.log('in fetch')
-        console.log(callback);
         getProductFromFile(callback);
     }
 }
