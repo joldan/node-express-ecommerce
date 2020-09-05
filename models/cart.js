@@ -32,11 +32,48 @@ module.exports = class Cart{
                 cart.products = [...cart.products, updatedProduct]
             }
             //increase price
-            cart.totalPrice += cart.totalPrice + +productPrice;
+            cart.totalPrice = cart.totalPrice + +productPrice;
             fs.writeFile(p, JSON.stringify(cart), err => {
                 console.log(err);
             })
         })
+    }
 
+    static getCart(callback){
+        fs.readFile(p, (err, fileContent) => {
+            if (!err) {
+                const cart = JSON.parse(fileContent);
+                callback(cart)
+            }else{
+                callback(null);
+            }
+        })
+    }
+
+    static deleteProduct(id, price){
+        //read file
+        fs.readFile( p, (err, fileContent) =>{
+            if(err){
+                return;
+            }
+            // Import cart
+            const cart = JSON.parse(fileContent);
+            const updatedCart = {...cart};
+            // Find Product to delete
+            const productIndex = updatedCart.products.findIndex( product => product.id === id);
+            console.log(productIndex)
+            if(productIndex === -1){
+                return;
+            }
+            const qty = updatedCart.products[productIndex].qty;            
+            // Delete product
+            updatedCart.products.splice(productIndex, 1);
+            // Adjust Cart Price
+            updatedCart.totalPrice =  updatedCart.totalPrice - qty * Number(price);
+            // Write File
+            fs.writeFile(p, JSON.stringify(updatedCart), err => {
+                console.log(err)
+            })
+        })      
     }
 }

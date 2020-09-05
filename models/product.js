@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const Cart = require('./cart')
 
 //path of product dara file
 const productPath = path.join(
@@ -23,7 +24,7 @@ module.exports = class Product {
     constructor(id, title, imageUrl, description, price){
         this.id = id;
         this.title = title;
-        this.imageUrl = imageUrl,
+        this.imageUrl= imageUrl,
         this.description = description,
         this.price = price
     }
@@ -49,18 +50,20 @@ module.exports = class Product {
 
     static deleteById(id) {
         getProductFromFile( products => {
-            const productToDeleteIndex = products.findIndex(prod => prod.id === id);
-            const updatedProducts = [...products];
-            updatedProducts.splice(productToDeleteIndex, 1);
+            const thisProduct = products.find( prod => prod.id === id);
+            const updatedProducts = products.filter(prod => prod.id !== id);
             fs.writeFile(productPath,JSON.stringify(updatedProducts), (err) => {
-                console.log(err);
+                if(!err){
+                    Cart.deleteProduct(id, thisProduct.price);
+                }else{
+                    console.log(err);
+                }
             });
         })
     }
     
     static findById(id, cb) {
         getProductFromFile(products => {
-            //console.log(products);
             const product = products.find( prod => {
                 return prod.id === id});
             cb(product)
