@@ -8,6 +8,8 @@ const rootDir = require('./util/path');
 
 //Import Controllers
 const errorController = require('./controllers/errors');
+//import DB manager
+const db = require('./util/database');
 
 //App creation
 const app = express();
@@ -22,13 +24,13 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 //Configure Midleware
-app.use(bodyParser.urlencoded({extended : false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')))
 
 //Configuring routes
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
-app.use( errorController.controller404); 
+app.use(errorController.controller404);
 
 app.listen(3000)
