@@ -9,7 +9,7 @@ const rootDir = require('./util/path');
 //Import Controllers
 const errorController = require('./controllers/errors');
 //import DB manager
-const db = require('./util/database');
+const sequelize = require('./util/database');
 
 //App creation
 const app = express();
@@ -33,4 +33,10 @@ app.use(shopRoutes);
 
 app.use(errorController.controller404);
 
-app.listen(3000)
+sequelize.sync()
+    .then( result => {
+        console.log(result)
+        app.listen(3000)})
+    .catch(err => console.log(err));
+
+
