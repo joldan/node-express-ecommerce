@@ -8,8 +8,11 @@ const rootDir = require('./util/path');
 
 //Import Controllers
 const errorController = require('./controllers/errors');
-//import DB manager
+//import DB manager and models
 const sequelize = require('./util/database');
+const Product = require('./models/product');
+const User = require('./models/user');
+
 
 //App creation
 const app = express();
@@ -25,7 +28,17 @@ const shopRoutes = require('./routes/shop');
 
 //Configure Midleware
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(rootDir, 'public')))
+app.use(express.static(path.join(rootDir, 'public')));
+
+//this midlware adds user 1 to any request
+app.use((req, res, next) => {
+    User.findByPk(1)
+        .then( user => {
+            req.user = user;
+            next();
+        })
+        .catch( err => console.log(err));
+})
 
 //Configuring routes
 app.use('/admin', adminRoutes);
@@ -33,10 +46,28 @@ app.use(shopRoutes);
 
 app.use(errorController.controller404);
 
-sequelize.sync()
-    .then( result => {
-        console.log(result)
-        app.listen(3000)})
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
+User.hasMany(Product);
+
+sequelize
+    //.sync( {force: true} )
+    .sync()
+    .then(result => {
+        return User.findByPk(1)
+        //console.log(result)
+        app.listen(3000)
+    })
+    .then(user => {
+        if (!user) {
+            return User.create({ name: 'Joaquin', email: 'something@omdharana.com' })
+        }
+        //values returned inside then blocks are automatically wraped into a promise
+        return user;
+    })
+    .then(user => {
+        console.log(user);
+        app.listen(3000);
+    })
     .catch(err => console.log(err));
 
 
