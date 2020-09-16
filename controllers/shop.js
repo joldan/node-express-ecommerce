@@ -28,44 +28,67 @@ exports.getProduct = (req, res, next) => {
 
 exports.getIndex = (req, res, rel) => {
     Product.findAll()
-        .then( products => {
+        .then(products => {
             res.render('shop/index', {
                 pageTitle: "Shop",
                 prods: products,
                 path: '/'
             });
         })
-        .catch( err => {
+        .catch(err => {
             console.log(err);
-        }) 
+        })
 }
 
 exports.getCart = (req, res, rel) => {
-    Cart.getCart(cart => {
-        Product.fetchAll(products => {
-            const cartProducts = [];
-            for (product of products) {
-                const cartProductData = cart.products.find(prod => prod.id === product.id)
-                if (cartProductData) {
-                    cartProducts.push({ productData: product, qty: cartProductData.qty });
-                }
-            }
+    req.user
+        .getCart()
+        .then(cart => {
+            return cart.getProducts();
+        })
+        .then(cartProducts => {
             res.render('shop/cart', {
                 pageTitle: "Your Cart",
                 path: '/cart',
-                totalPrice: cart.totalPrice,
                 products: cartProducts
             })
         })
-    })
+        .catch(err => { console.log(err) })
 }
 
 exports.postCart = (req, res, rel) => {
     const prodId = req.body.productId.trim();
-    Product.findById(prodId, product => {
-        Cart.addProduct(prodId, product.price);
-    });
-    res.redirect('/cart');
+    let fetchedCart;
+    let newQuantity = 1;
+    req.user
+    //get cart
+    .getCart()
+        .then(cart => {
+            //Find products in cart to see if add or increase product
+            fetchedCart = cart;
+            return cart.getProducts({ where: { id: prodId } })
+        })
+        .then(products => {
+            let product;
+            //if product is present
+            if (products.length > 0) {
+                product = products[0];
+            }
+            if (product) {
+                const oldQuantity = product.cartItem.quantity;
+                newQuantity = oldQuantity + 1;
+                return product;
+            }
+            // If new product. Find product by its ID
+            return Product.findByPk(prodId)
+        })
+        .then(product => {
+            return fetchedCart.addProduct(product, {through : {quantity : newQuantity}});
+        })
+        .then( () => {
+            res.redirect('/cart');
+        })
+        .catch(err => console.log(err));
 }
 
 exports.postCartDeleteProduct = (req, res, rel) => {
