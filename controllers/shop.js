@@ -61,8 +61,8 @@ exports.postCart = (req, res, rel) => {
     let fetchedCart;
     let newQuantity = 1;
     req.user
-    //get cart
-    .getCart()
+        //get cart
+        .getCart()
         .then(cart => {
             //Find products in cart to see if add or increase product
             fetchedCart = cart;
@@ -83,9 +83,9 @@ exports.postCart = (req, res, rel) => {
             return Product.findByPk(prodId)
         })
         .then(product => {
-            return fetchedCart.addProduct(product, {through : {quantity : newQuantity}});
+            return fetchedCart.addProduct(product, { through: { quantity: newQuantity } });
         })
-        .then( () => {
+        .then(() => {
             res.redirect('/cart');
         })
         .catch(err => console.log(err));
@@ -93,11 +93,19 @@ exports.postCart = (req, res, rel) => {
 
 exports.postCartDeleteProduct = (req, res, rel) => {
     const productId = req.body.productId;
-    Product.findById(productId, product => {
-        console.log(product);
-        Cart.deleteProduct(productId, product.price);
-        res.redirect('/cart')
-    })
+    req.user
+        .getCart()
+        .then(cart => {
+            return cart.getProducts({ where: { id: productId } })
+        })
+        .then(products => {
+            const product = products[0];
+            return product.cartItem.destroy();
+        })
+        .then(result => {
+            res.redirect('/cart');
+        })
+        .catch(err => console.log(err));
 }
 
 exports.getOrders = (req, res, rel) => {
