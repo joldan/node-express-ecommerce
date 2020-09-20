@@ -69,8 +69,6 @@ sequelize
     .sync()
     .then(result => {
         return User.findByPk(1)
-        //console.log(result)
-        app.listen(3000)
     })
     .then(user => {
         if (!user) {
