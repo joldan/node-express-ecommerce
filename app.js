@@ -8,7 +8,7 @@ const rootDir = require('./util/path');
 
 //Import Controllers
 const errorController = require('./controllers/errors');
-
+const mongoConnect = require('./util/database').mongoConnect;
 
 //App creation
 const app = express();
@@ -20,7 +20,7 @@ app.set('views', 'views')
 
 //Importing Routes Routes
 const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
+// const shopRoutes = require('./routes/shop');
 
 //Configure Midleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,13 +34,18 @@ app.use((req, res, next) => {
     //         next();
     //     })
     //     .catch( err => console.log(err));
+    next();
 })
 
 //Configuring routes
 app.use('/admin', adminRoutes);
-app.use(shopRoutes);
+// app.use(shopRoutes);
 
 app.use(errorController.controller404);
 
 
-//Define Model Asociation
+//Connect to DB
+
+mongoConnect( () => {
+    app.listen(3000);
+})
