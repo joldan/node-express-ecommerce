@@ -20,7 +20,7 @@ app.set('views', 'views')
 
 //Importing Routes Routes
 const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const shopRoutes = require('./routes/shop');
 
 //Configure Midleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,7 +39,7 @@ app.use((req, res, next) => {
 
 //Configuring routes
 app.use('/admin', adminRoutes);
-// app.use(shopRoutes);
+app.use(shopRoutes);
 
 app.use(errorController.controller404);
 
