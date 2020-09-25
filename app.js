@@ -9,6 +9,7 @@ const rootDir = require('./util/path');
 //Import Controllers
 const errorController = require('./controllers/errors');
 const mongoConnect = require('./util/database').mongoConnect;
+const User = require('./models/user');
 
 //App creation
 const app = express();
@@ -28,13 +29,12 @@ app.use(express.static(path.join(rootDir, 'public')));
 
 //this midlware adds user 1 to any request
 app.use((req, res, next) => {
-    // User.findByPk(1)
-    //     .then( user => {
-    //         req.user = user;
-    //         next();
-    //     })
-    //     .catch( err => console.log(err));
-    next();
+    User.findById('5f6df3260e62e90e90bb33c3')
+        .then( user => {
+            req.user = user;
+            next();
+        })
+        .catch( err => console.log(err));
 })
 
 //Configuring routes

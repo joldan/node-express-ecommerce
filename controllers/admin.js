@@ -15,8 +15,9 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = req.body.price;
+    const userId = req.user._id;
     //Since user owns products, Sequelize creates an createProduct Function that creates a product
-    const product = new Product(title, imageUrl, price, description);
+    const product = new Product(title, imageUrl, price, description, null, userId);
     product
         .save()
         .then(result => {
