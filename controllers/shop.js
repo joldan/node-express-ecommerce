@@ -1,8 +1,11 @@
 const Product = require('../models/product');
 const User = require('../models/user')
 
+const mongoose = require('mongoose');
+
+
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then(products => {
             res.render('shop/product-list', {
                 pageTitle: "Shop",
@@ -11,10 +14,15 @@ exports.getProducts = (req, res, next) => {
             });
         })
         .catch(err => console.log(err));
-}
+} 
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
+    console.log(prodId)
+    console.log(typeof(prodId))
+    console.log(prodId.length)
+    console.log(mongoose.Types.ObjectId.isValid(prodId))
+
     Product.findById(prodId)
         .then(product => {
             res.render('shop/product-detail', {
@@ -27,7 +35,7 @@ exports.getProduct = (req, res, next) => {
 }
 
 exports.getIndex = (req, res, rel) => {
-    Product.fetchAll()
+    Product.find()
         .then(products => {
             res.render('shop/index', {
                 pageTitle: "Shop",
@@ -54,7 +62,11 @@ exports.getCart = (req, res, rel) => {
 }
 
 exports.postCart = (req, res, rel) => {
-    const prodId = req.body.productId.trim();
+    const prodId = req.body.productId;
+    console.log(prodId)
+    console.log(typeof(prodId))
+    console.log(prodId.length)
+    console.log(mongoose.Types.ObjectId.isValid(prodId))
     Product.findById(prodId)
         .then(product => {
             return req.user.addToCart(product);

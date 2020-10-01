@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-const mongodb = require('mongodb');
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
@@ -17,7 +16,13 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const userId = req.user;
     //Since user owns products, Sequelize creates an createProduct Function that creates a product
-    const product = new Product(title, imageUrl, price, description, null, userId);
+    const product = new Product({
+        title: title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description,
+        userId : userId
+    });
     product
         .save()
         .then(result => {
@@ -28,7 +33,7 @@ exports.postAddProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then(products => {
             res.render('admin/products', {
                 pageTitle: "Admin Products",
@@ -67,8 +72,14 @@ exports.postEditProduct = (req, res, next) => {
     const updatedDescription = req.body.description;
     const updatedPrice = req.body.price;
 
-    const updatedProduct = new Product(updatedTitle, updatedImageUrl, updatedPrice, updatedDescription, prodId);
-    updatedProduct.save()
+    Product.findById(prodId)
+        .then(product => {
+            product.title = updatedTitle;
+            product.imageUrl = updatedImageUrl;
+            product.price = updatedPrice;
+            product.description = updatedDescription;
+            return product.save()
+        })
         .then(result => {
             console.log('Updated Product!!!')
             res.redirect('/admin/products')
@@ -78,8 +89,8 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    Product.deleteById(prodId)
-        .then( () => {
+    Product.findByIdAndRemove(prodId)
+        .then(() => {
             res.redirect('/admin/products');
         })
         .catch(err => { console.log(err) });

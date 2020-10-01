@@ -2,14 +2,14 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 //Root dir imports
 const rootDir = require('./util/path');
 
 //Import Controllers
 const errorController = require('./controllers/errors');
-const mongoConnect = require('./util/database').mongoConnect;
-const User = require('./models/user');
+const User = require('./models/user')
 
 //App creation
 const app = express();
@@ -27,11 +27,11 @@ const shopRoutes = require('./routes/shop');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
 
-//this midlware adds user 1 to any request
+// this midlware adds user 1 to any request
 app.use((req, res, next) => {
-    User.findById('5f6df3260e62e90e90bb33c3')
+    User.findById('5f75bb417967b00c46e6682c')
         .then( user => {
-            req.user = new User(user.name, user.email, user.cart, user._id);
+            req.user = user;
             next();
         })
         .catch( err => console.log(err));
@@ -46,6 +46,20 @@ app.use(errorController.controller404);
 
 //Connect to DB
 
-mongoConnect( () => {
-    app.listen(3000);
+mongoose.connect('mongodb+srv://ecomApp:4Bmk82KRrN4rkzyj@node-ecom.zfwd4.mongodb.net/node-ecom?retryWrites=true&w=majority')
+.then( result => {
+    User.findOne().then(user => {
+        if(user){
+            const user = new User( {
+                name : 'Alfredo',
+                email : 'alfredo@omdharana.com',
+                cart : {
+                    items: []
+                }
+            })
+        }
+        user.save();
+    })
+    app.listen(3000)
 })
+.catch( err => console.log(err))
