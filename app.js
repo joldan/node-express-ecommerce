@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
 
 //Root dir imports
 const rootDir = require('./util/path');
@@ -27,6 +28,7 @@ const authRoutes = require('./routes/auth')
 //Configure Midleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
+app.use(session({secret : 'my secret', resave : false, saveUninitialized : false));
 
 // this midlware adds user 1 to any request
 app.use((req, res, next) => {
