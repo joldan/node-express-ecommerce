@@ -4,6 +4,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
+var MongoDBStore = require('connect-mongodb-session')(session);
+
 
 //Root dir imports
 const rootDir = require('./util/path');
@@ -12,8 +14,14 @@ const rootDir = require('./util/path');
 const errorController = require('./controllers/errors');
 const User = require('./models/user')
 
+const MONGODB_URI = 'mongodb+srv://ecomApp:4Bmk82KRrN4rkzyj@node-ecom.zfwd4.mongodb.net/node-ecom?retryWrites=true&w=majority'
+
 //App creation
 const app = express();
+const store = new MongoDBStore({
+    uri: MONGODB_URI,
+    collection: 'sessions'
+  });
 
 //Templating Engine Configuration
 app.set('view engine', 'ejs');
@@ -28,16 +36,21 @@ const authRoutes = require('./routes/auth')
 //Configure Midleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
-app.use(session({secret : 'my secret', resave : false, saveUninitialized : false));
+app.use(session({secret : 'my secret', resave : false, saveUninitialized : false, store: store}));
 
 // this midlware adds user 1 to any request
 app.use((req, res, next) => {
-    User.findById('5f75bb417967b00c46e6682c')
-        .then( user => {
-            req.user = user;
-            next();
-        })
-        .catch( err => console.log(err));
+    if(req.session.user){
+        const loggedUserId = req.session.user._id
+        User.findById(loggedUserId)
+            .then( loggedUserMongooseObject => {
+                req.loggedUserMongooseObject = loggedUserMongooseObject;
+                next();
+            })
+            .catch( err => console.log(err));
+    }else{
+        next()
+    }
 })
 
 //Configuring routes
@@ -50,7 +63,7 @@ app.use(errorController.controller404);
 
 //Connect to DB
 
-mongoose.connect('mongodb+srv://ecomApp:4Bmk82KRrN4rkzyj@node-ecom.zfwd4.mongodb.net/node-ecom?retryWrites=true&w=majority')
+mongoose.connect(MONGODB_URI)
 .then( result => {
     User.findOne().then(user => {
         if(user){

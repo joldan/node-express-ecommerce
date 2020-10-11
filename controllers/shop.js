@@ -12,7 +12,8 @@ exports.getProducts = (req, res, next) => {
             res.render('shop/product-list', {
                 pageTitle: "Shop",
                 prods: products,
-                path: '/'
+                path: '/',
+                isLoggedIn: req.session.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -30,7 +31,8 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-detail', {
                 pageTitle: `product-${product.title}`,
                 product: product,
-                path: '/product-detail'
+                path: '/product-detail',
+                isLoggedIn: req.session.isLoggedIn
             })
         })
         .catch(err => console.log(err));
@@ -42,7 +44,8 @@ exports.getIndex = (req, res, rel) => {
             res.render('shop/index', {
                 pageTitle: "Shop",
                 prods: products,
-                path: '/'
+                path: '/',
+                isLoggedIn: req.session.isLoggedIn
             });
         })
         .catch(err => {
@@ -51,7 +54,7 @@ exports.getIndex = (req, res, rel) => {
 }
 
 exports.getCart = (req, res, rel) => {
-    req.user
+    req.loggedUserMongooseObject
         .populate('cart.items.productId')
         .execPopulate()
         .then(user => {
@@ -60,7 +63,8 @@ exports.getCart = (req, res, rel) => {
             res.render('shop/cart', {
                 pageTitle: "Your Cart",
                 path: '/cart',
-                products: cartProducts
+                products: cartProducts,
+                isLoggedIn: req.session.isLoggedIn
             })
         })
         .catch(err => { console.log(err) })
@@ -68,13 +72,9 @@ exports.getCart = (req, res, rel) => {
 
 exports.postCart = (req, res, rel) => {
     const prodId = req.body.productId;
-    console.log(prodId)
-    console.log(typeof (prodId))
-    console.log(prodId.length)
-    console.log(mongoose.Types.ObjectId.isValid(prodId))
     Product.findById(prodId)
         .then(product => {
-            return req.user.addToCart(product);
+            return req.loggedUserMongooseObject.addToCart(product);
         })
         .then(result => {
             res.redirect('/cart');
@@ -86,7 +86,7 @@ exports.postCart = (req, res, rel) => {
 
 exports.postCartDeleteProduct = (req, res, rel) => {
     const productId = req.body.productId;
-    req.user.removeFromCart(productId)
+    req.loggedUserMongooseObject.removeFromCart(productId)
         .then(result => {
             res.redirect('/cart');
         })
@@ -94,21 +94,22 @@ exports.postCartDeleteProduct = (req, res, rel) => {
 }
 
 exports.getOrders = (req, res, rel) => {
-    Order.find({ 'user.id' : req.user._id })
+    Order.find({ 'user.id' : req.loggedUserMongooseObject._id })
         .then(orders => {
             console.log(orders)
             console.log(orders[0].products)
             res.render('shop/orders', {
                 pageTitle: "Your Orders",
                 orders: orders,
-                path: '/orders'
+                path: '/orders',
+                isLoggedIn: req.session.isLoggedIn
             })
         })
         .catch(err => { console.log(err) })
 }
 
 exports.postOrder = (req, res, rel) => {
-    req.user
+    req.loggedUserMongooseObject
         .populate('cart.items.productId')
         .execPopulate()
         .then(user => {
@@ -118,15 +119,15 @@ exports.postOrder = (req, res, rel) => {
             console.log(cartProducts)
             const order = new Order({
                 user: {
-                    name: req.user.name,
-                    id: req.user
+                    name: req.loggedUserMongooseObject.name,
+                    id: req.loggedUserMongooseObject
                 },
                 products: cartProducts
             })
             return order.save()
         })
         .then(() => {
-            return req.user.clearCart()
+            return req.loggedUserMongooseObject.clearCart()
         })
         .then(result => {
             res.redirect('/orders');
@@ -138,6 +139,7 @@ exports.postOrder = (req, res, rel) => {
 exports.getCheckout = (req, res, rel) => {
     res.render('shop/checkout', {
         pageTitle: 'Checkout',
-        path: '/checkout'
+        path: '/checkout',
+        isLoggedIn: req.session.isLoggedIn
     })
 }
