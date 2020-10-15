@@ -21,7 +21,7 @@ const app = express();
 const store = new MongoDBStore({
     uri: MONGODB_URI,
     collection: 'sessions'
-  });
+});
 
 //Templating Engine Configuration
 app.set('view engine', 'ejs');
@@ -36,19 +36,19 @@ const authRoutes = require('./routes/auth')
 //Configure Midleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
-app.use(session({secret : 'my secret', resave : false, saveUninitialized : false, store: store}));
+app.use(session({ secret: 'my secret', resave: false, saveUninitialized: false, store: store }));
 
 // this midlware adds user 1 to any request
 app.use((req, res, next) => {
-    if(req.session.user){
+    if (req.session.user) {
         const loggedUserId = req.session.user._id
         User.findById(loggedUserId)
-            .then( loggedUserMongooseObject => {
+            .then(loggedUserMongooseObject => {
                 req.loggedUserMongooseObject = loggedUserMongooseObject;
                 next();
             })
-            .catch( err => console.log(err));
-    }else{
+            .catch(err => console.log(err));
+    } else {
         next()
     }
 })
@@ -64,19 +64,7 @@ app.use(errorController.controller404);
 //Connect to DB
 
 mongoose.connect(MONGODB_URI)
-.then( result => {
-    User.findOne().then(user => {
-        if(user){
-            const user = new User( {
-                name : 'Alfredo',
-                email : 'alfredo@omdharana.com',
-                cart : {
-                    items: []
-                }
-            })
-        }
-        user.save();
+    .then(result => {
+        app.listen(3000)
     })
-    app.listen(3000)
-})
-.catch( err => console.log(err))
+    .catch(err => console.log(err))
