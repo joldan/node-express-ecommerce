@@ -4,7 +4,9 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
-var MongoDBStore = require('connect-mongodb-session')(session);
+const MongoDBStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+
 
 
 //Root dir imports
@@ -22,6 +24,7 @@ const store = new MongoDBStore({
     uri: MONGODB_URI,
     collection: 'sessions'
 });
+const csrfProtection = csrf()
 
 //Templating Engine Configuration
 app.set('view engine', 'ejs');
@@ -37,6 +40,8 @@ const authRoutes = require('./routes/auth')
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
 app.use(session({ secret: 'my secret', resave: false, saveUninitialized: false, store: store }));
+app.use(csrfProtection);
+
 
 // this midlware adds user 1 to any request
 app.use((req, res, next) => {
@@ -51,6 +56,12 @@ app.use((req, res, next) => {
     } else {
         next()
     }
+})
+
+app.use((req, res, next) => {
+    res.locals.isLoggedIn = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken()
+    next();
 })
 
 //Configuring routes
