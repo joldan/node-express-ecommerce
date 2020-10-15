@@ -48,8 +48,7 @@ exports.postLogout = (req, res, next) => {
 exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         pageTitle: "Sign Up",
-        path: '/signup',
-        isLoggedIn: req.session.isLoggedIn
+        path: '/signup'
     });
 }
 
@@ -77,8 +76,4 @@ exports.postSignup = (req, res, next) => {
             res.redirect('/login');
         })
         .catch(err => console.log(err));
-}
-
-function userIsLoggedIn(){
-    return req.session.isLoggedIn;
 }
