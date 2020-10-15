@@ -6,6 +6,7 @@ const Order = require('../models/order')
 const mongoose = require('mongoose');
 
 
+
 exports.getProducts = (req, res, next) => {
     Product.find()
         .then(products => {
