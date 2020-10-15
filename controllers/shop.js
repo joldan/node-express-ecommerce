@@ -119,7 +119,7 @@ exports.postOrder = (req, res, rel) => {
             console.log(cartProducts)
             const order = new Order({
                 user: {
-                    name: req.loggedUserMongooseObject.name,
+                    email: req.loggedUserMongooseObject.email,
                     id: req.loggedUserMongooseObject
                 },
                 products: cartProducts
